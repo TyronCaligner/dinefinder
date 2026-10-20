@@ -2,7 +2,11 @@
 import { Link } from 'react-router-dom'
 import { foodItems } from '../data/foodData'
 
-export default function Favorites({ favorites, onToggleFavorite }) {
+export default function Favorites({
+  favorites = [],
+  onToggleFavorite,
+  onAddToCart,
+}) {
   const favoriteFoods = foodItems.filter((food) =>
     favorites.some((favorite) => favorite.foodItemId === food.id)
   )
@@ -10,7 +14,9 @@ export default function Favorites({ favorites, onToggleFavorite }) {
   return (
     <section className="min-h-[70vh] bg-orange-50 px-6 py-16">
       <div className="mx-auto max-w-7xl">
-        <p className="font-semibold text-orange-600">YOUR COLLECTION</p>
+        <p className="font-semibold text-orange-600">
+          YOUR COLLECTION
+        </p>
 
         <h1 className="mt-2 text-3xl font-extrabold md:text-4xl">
           Favorite Dishes
@@ -41,10 +47,19 @@ export default function Favorites({ favorites, onToggleFavorite }) {
           </div>
         ) : (
           <>
-            <p className="mt-8 text-sm text-gray-500">
-              {favoriteFoods.length} saved dish
-              {favoriteFoods.length === 1 ? '' : 'es'}
-            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+              <p className="text-sm text-gray-500">
+                {favoriteFoods.length} saved dish
+                {favoriteFoods.length === 1 ? '' : 'es'}
+              </p>
+
+              <Link
+                to="/cart"
+                className="rounded-xl bg-orange-600 px-5 py-3 font-bold text-white transition hover:bg-orange-700"
+              >
+                🛒 View Cart
+              </Link>
+            </div>
 
             <div className="mt-5 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
               {favoriteFoods.map((food) => (
@@ -52,19 +67,21 @@ export default function Favorites({ favorites, onToggleFavorite }) {
                   key={food.id}
                   className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                 >
-                  <img
-                    src={food.image}
-                    alt={food.name}
-                    loading="lazy"
-                    className="h-52 w-full object-cover"
-                  />
+                  <div className="relative">
+                    <img
+                      src={food.image}
+                      alt={food.name}
+                      loading="lazy"
+                      className="h-52 w-full object-cover"
+                    />
 
-                  <div className="p-5">
-                    <span className="rounded-full bg-orange-50 px-3 py-1 text-sm font-semibold text-orange-700">
+                    <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-sm font-semibold text-orange-700">
                       {food.category}
                     </span>
+                  </div>
 
-                    <h2 className="mt-3 text-xl font-bold">
+                  <div className="p-5">
+                    <h2 className="text-xl font-bold">
                       {food.name}
                     </h2>
 
@@ -78,8 +95,16 @@ export default function Favorites({ favorites, onToggleFavorite }) {
 
                     <button
                       type="button"
-                      onClick={() => onToggleFavorite(food.id)}
-                      className="mt-4 w-full rounded-xl border border-red-200 px-4 py-3 font-bold text-red-600 transition hover:bg-red-50"
+                      onClick={() => onAddToCart?.(food.id)}
+                      className="mt-4 w-full rounded-xl bg-orange-600 px-4 py-3 font-bold text-white transition hover:bg-orange-700"
+                    >
+                      🛒 Add to Cart
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => onToggleFavorite?.(food.id)}
+                      className="mt-3 w-full rounded-xl border border-red-200 px-4 py-3 font-bold text-red-600 transition hover:bg-red-50"
                     >
                       ❤️ Remove from Favorites
                     </button>

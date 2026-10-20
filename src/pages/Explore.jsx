@@ -12,9 +12,14 @@ const categories = [
   'Desserts',
 ]
 
-export default function Explore({ favorites = [], onToggleFavorite }) {
+export default function Explore({
+  favorites = [],
+  onToggleFavorite,
+  onAddToCart,
+}) {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
+  const [addedFoodId, setAddedFoodId] = useState(null)
 
   const filteredFoods = useMemo(() => {
     const search = searchTerm.trim().toLowerCase()
@@ -32,10 +37,23 @@ export default function Explore({ favorites = [], onToggleFavorite }) {
     })
   }, [selectedCategory, searchTerm])
 
+  function handleAddToCart(foodId) {
+    onAddToCart?.(foodId)
+    setAddedFoodId(foodId)
+
+    window.setTimeout(() => {
+      setAddedFoodId((currentId) =>
+        currentId === foodId ? null : currentId
+      )
+    }, 1500)
+  }
+
   return (
     <section className="min-h-[70vh] bg-white py-16">
       <div className="mx-auto max-w-7xl px-6">
-        <p className="font-semibold text-orange-600">EXPLORE OUR MENU</p>
+        <p className="font-semibold text-orange-600">
+          EXPLORE OUR MENU
+        </p>
 
         <h1 className="mt-2 text-3xl font-extrabold md:text-4xl">
           What are you craving?
@@ -71,18 +89,27 @@ export default function Explore({ favorites = [], onToggleFavorite }) {
           ))}
         </div>
 
-        <div className="mt-8 flex items-center justify-between gap-4">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-gray-500">
             Showing {filteredFoods.length} dish
             {filteredFoods.length === 1 ? '' : 'es'}
           </p>
 
-          <Link
-            to="/favorites"
-            className="font-semibold text-orange-600 hover:text-orange-700"
-          >
-            ❤️ Favorites ({favorites.length})
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              to="/favorites"
+              className="font-semibold text-orange-600 hover:text-orange-700"
+            >
+              ❤️ Favorites ({favorites.length})
+            </Link>
+
+            <Link
+              to="/cart"
+              className="rounded-xl bg-orange-600 px-4 py-2.5 font-bold text-white transition hover:bg-orange-700"
+            >
+              🛒 View Cart
+            </Link>
+          </div>
         </div>
 
         {filteredFoods.length > 0 ? (
@@ -95,6 +122,8 @@ export default function Explore({ favorites = [], onToggleFavorite }) {
               const isFavorite = favorites.some(
                 (favorite) => favorite.foodItemId === food.id
               )
+
+              const wasAdded = addedFoodId === food.id
 
               return (
                 <article
@@ -129,7 +158,9 @@ export default function Explore({ favorites = [], onToggleFavorite }) {
                   </div>
 
                   <div className="p-5">
-                    <h2 className="text-xl font-bold">{food.name}</h2>
+                    <h2 className="text-xl font-bold">
+                      {food.name}
+                    </h2>
 
                     <p className="mt-2 text-sm leading-6 text-gray-600">
                       {food.description}
@@ -147,11 +178,23 @@ export default function Explore({ favorites = [], onToggleFavorite }) {
                       <button
                         type="button"
                         onClick={() => onToggleFavorite?.(food.id)}
-                        className="rounded-xl bg-orange-50 px-4 py-2.5 font-semibold text-orange-700 transition hover:bg-orange-100"
+                        className="rounded-xl bg-orange-50 px-3 py-2.5 text-sm font-semibold text-orange-700 transition hover:bg-orange-100"
                       >
                         {isFavorite ? 'Saved ❤️' : 'Save Favorite'}
                       </button>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleAddToCart(food.id)}
+                      className={`mt-4 w-full rounded-xl px-5 py-3 font-bold text-white transition ${
+                        wasAdded
+                          ? 'bg-green-600'
+                          : 'bg-orange-600 hover:bg-orange-700'
+                      }`}
+                    >
+                      {wasAdded ? '✓ Added to Cart!' : '🛒 Add to Cart'}
+                    </button>
                   </div>
                 </article>
               )
@@ -160,7 +203,11 @@ export default function Explore({ favorites = [], onToggleFavorite }) {
         ) : (
           <div className="mt-8 rounded-2xl bg-orange-50 p-10 text-center">
             <p className="text-4xl">🍽️</p>
-            <h2 className="mt-4 text-xl font-bold">No dishes found</h2>
+
+            <h2 className="mt-4 text-xl font-bold">
+              No dishes found
+            </h2>
+
             <p className="mt-2 text-gray-600">
               Try another search or select a different category.
             </p>
